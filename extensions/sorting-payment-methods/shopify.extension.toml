@@ -1,0 +1,24 @@
+api_version = "2025-04"
+
+[[extensions]]
+name = "t:name"
+handle = "sortingpaymentmethods"
+
+uid = "83430b0f-c35d-f92b-970e-2a42b87d756f1e9358a2"
+
+type = "function"
+
+description = "t:description"
+
+  [[extensions.targeting]]
+  target = "purchase.payment-customization.run"
+  input_query = "src/run.graphql"
+  export = "run"
+
+  [extensions.build]
+  command = ""
+  path = "dist/function.wasm"
+
+  [extensions.ui.paths]
+  create = "/"
+  details = "/"

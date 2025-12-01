@@ -1,0 +1,21 @@
+query RunInput {
+  cart {
+    cost {
+      totalAmount {
+        amount
+      }
+    }
+  }
+  paymentMethods {
+    id
+    name
+  }
+  paymentCustomization {
+    metafield(
+      namespace: "payment-customization"
+      key: "function-configuration-sort"
+    ) {
+      value
+    }
+  }
+}

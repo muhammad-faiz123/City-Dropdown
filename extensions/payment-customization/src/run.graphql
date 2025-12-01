@@ -1,0 +1,41 @@
+query RunInput {
+  cart {
+    cost {
+      totalAmount {
+        amount
+      }
+    }
+    attribute(key: "delivery_country") {
+      key
+      value
+    }
+    lines {
+      id
+      quantity
+      merchandise {
+        ... on ProductVariant {
+          id        
+          product {
+            id      
+            title
+            metafield(namespace: "custom", key: "collection_name") {  # updated key
+              value
+            }
+          }
+        }
+      }
+    }
+  }
+  paymentMethods {
+    id
+    name
+  }
+  paymentCustomization {
+    metafield(
+      namespace: "payment-customization"
+      key: "function-configuration"
+    ) {
+      value
+    }
+  }
+}

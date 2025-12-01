@@ -1,0 +1,33 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "65b6f3a795c6bc61bf9d51f899e8b24e"
+name = "zeen_ahmed"
+handle = "zeen_ahmed"
+application_url = "https://dust-barrier-receipt-marc.trycloudflare.com"
+embedded = true
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = "store-for-customer-account-test.myshopify.com"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_metaobjects,read_payment_customizations,read_translations,write_metaobjects,write_payment_customizations,write_products"
+
+[auth]
+redirect_urls = [
+  "https://dust-barrier-receipt-marc.trycloudflare.com/auth/callback",
+  "https://dust-barrier-receipt-marc.trycloudflare.com/auth/shopify/callback",
+  "https://dust-barrier-receipt-marc.trycloudflare.com/api/auth/callback"
+]
+
+[webhooks]
+api_version = "2024-07"
+
+[app_proxy]
+url = "https://dust-barrier-receipt-marc.trycloudflare.com/myApp"
+subpath = "proxy"
+prefix = "apps"
+
+[pos]
+embedded = false

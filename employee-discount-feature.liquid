@@ -1,0 +1,238 @@
+<style>
+.employee-discount-feature {
+    margin: 1.5rem 0;
+}
+button.employee-discount-btn {
+    outline: none;
+    background: black;
+    color: white;
+    height: 3rem;
+    padding: 0 2rem;
+    border-radius: 0.4rem;
+    width: 100%;
+    cursor: pointer;
+}
+p.error.error-discount {
+    color: #ff6d6d;
+    margin-top: 1rem;
+}
+p.success.success-discount {
+    color: green;
+    margin-top: 1rem;
+}
+.order-summary__section.order-summary__section--discount {
+    display: none;
+}
+button.employee-discount-btn.employee-discount-remove {
+    background: red;
+}
+.app-ajax-loader{
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999999;
+}
+.app-ajax-loader svg{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 50px;
+    height: 50px;
+}
+</style>
+
+<div class="employee-discount-feature">
+    <div class="app-ajax-loader hidden"><svg width="50" height="50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="aplds-rolling" style="background:0 0"><circle cx="50" cy="50" fill="none" stroke="#000" stroke-width="4" r="44" stroke-dasharray="207.34511513692632 71.11503837897544" transform="rotate(175.95 50 50)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 50;360 50 50" keyTimes="0;1" dur="1.5s" begin="0s" repeatCount="indefinite"/></circle></svg></div>
+    <button class="employee-discount-btn employee-discount-add hidden">Get Employee Discount</button>
+    <button class="employee-discount-btn employee-discount-remove hidden">Remove Discount</button>
+    <p class="success success-discount hidden"></p> 
+    <p class="error error-discount hidden"></p> 
+</div>
+
+
+<script>    
+    {% comment %} Order Summary shown on tablets and mobiles {% endcomment %}
+    if(window.innerWidth < 1000){
+        document.querySelector('.order-summary-toggle').click() 
+    }
+    document.querySelector('.order-summary__sections').insertBefore(document.querySelector('.employee-discount-feature'), document.querySelector('.order-summary__section--discount'))
+    var hostUrl = 'https://shopify-zeen-app-be.epinovus.net'
+    {% comment %} var hostUrl = 'http://localhost:3000'  {% endcomment %}
+    var shopUrl = 'zeenwoman.myshopify.com' 
+    var customerId = {{ customer.id }}   
+    var discountThreshold = 35
+    var lineDiscount = 0
+    var subTotalPrice = 0
+    var discountAmount = 0
+    var totalLineSalePrice = 0
+    var discountEligible = false
+    {% for line_item in checkout.line_items %}
+        var lineSalePrice = {{ line_item.variant.price | money_without_currency | remove: ',' | times: line_item.quantity }}
+        totalLineSalePrice = totalLineSalePrice + lineSalePrice
+        var lineOriginalPrice = {{ line_item.variant.compare_at_price | money_without_currency | remove: ',' | times: line_item.quantity }}
+        lineDiscount = parseInt(discountThreshold - (100 - (lineSalePrice / lineOriginalPrice) * 100))
+        {% comment %} Checking Discount Eligibility {% endcomment %}
+        if(lineDiscount > 0 && discountThreshold >= lineDiscount){
+            discountAmount = parseInt(discountAmount + (lineSalePrice - (lineOriginalPrice - (lineOriginalPrice * 0.35)))) 
+            discountEligi≠ble = discountEligible + true
+        }
+        else{
+            discountAmount = parseInt(discountAmount + (lineSalePrice - lineSalePrice))
+            discountEligible = discountEligible + false
+        }
+    {% endfor %}
+    subTotalPrice = totalLineSalePrice
+    {% comment %} console.log(sessionStorage.getItem('subTotalPrice'), subTotalPrice, totalLineSalePrice) {% endcomment %}
+    {% comment %} Check if discount is applied or not on the basis of session storage {% endcomment %}
+    if(sessionStorage.getItem('discountCode') != "" && sessionStorage.getItem('discountCode') != null && sessionStorage.getItem('subTotalPrice') != "" && sessionStorage.getItem('subTotalPrice') != null){
+        document.querySelector('.employee-discount-add').classList.add('hidden')
+        document.querySelector('.employee-discount-remove').classList.remove('hidden')
+        if(parseInt(sessionStorage.getItem('subTotalPrice')) != parseInt(totalLineSalePrice)){
+            removeDiscountCode()
+        }
+    }
+    else{
+        document.querySelector('.employee-discount-add').classList.remove('hidden')
+        document.querySelector('.employee-discount-remove').classList.add('hidden')
+    }
+
+    {% comment %} Show only EmployeeDiscount, remove extra digits {% endcomment %}
+    function discountCodeTextModifier(){
+        if (document.querySelector('[data-discount-type="fixed_amount"] .reduction-code__text')) {
+            var discountText = document.querySelector('[data-discount-type="fixed_amount"] .reduction-code__text').innerText
+            if(discountText.includes('EMPLOYEEDISCOUNT')){
+                document.querySelector('[data-discount-type="fixed_amount"] .reduction-code__text').innerText = discountText.split('#')[0]
+            }
+        }
+    }
+
+    discountCodeTextModifier()
+
+    document.querySelector('.employee-discount-add').addEventListener('click', (e) => {
+        e.preventDefault()
+        if(discountEligible){
+            document.querySelector('.app-ajax-loader').classList.remove('hidden')
+            var discount = createDiscountCode(customerId, discountAmount)
+            discount.then(data => {
+                if(data.discountCode){
+                    document.querySelector('.order-summary__section--discount #checkout_reduction_code').value = data.discountCode
+                    document.querySelector('.order-summary__section--discount #checkout_submit').classList.remove('btn--disabled')
+                    document.querySelector('.order-summary__section--discount #checkout_submit').removeAttribute('disabled')
+                    document.querySelector('.order-summary__section--discount #checkout_submit').click()
+                    var checkExist = setInterval(function() {
+                        if (document.querySelector('.order-summary__section--discount .tags-list')) {
+                            clearInterval(checkExist)
+                            document.querySelector('.success-discount').innerText = 'Discount is successfully applied. This discount in valid only for 30 Minutes. Please checkout ASAP.'
+                            document.querySelector('.success-discount').classList.remove('hidden')
+                            document.querySelector('.employee-discount-add').classList.add('hidden')
+                            document.querySelector('.employee-discount-remove').classList.remove('hidden')
+                            document.querySelector('.app-ajax-loader').classList.add('hidden')
+                            sessionStorage.setItem('discountCode', 'true')
+                            sessionStorage.setItem('subTotalPrice', subTotalPrice)
+                            discountCodeTextModifier()
+                        }
+                    }, 10);
+                }
+                else if(data.discountLimitError) {
+                    document.querySelector('.error-discount').innerText = data.description
+                    document.querySelector('.error-discount').classList.remove('hidden')
+                    document.querySelector('.app-ajax-loader').classList.add('hidden')
+                }
+            })
+        }
+        else{
+            document.querySelector('.error-discount').innerText = '*You are eligible for 35% discount, but products are already greater than 35% discount'
+            document.querySelector('.error-discount').classList.remove('hidden')
+            {% comment %} setTimeout(() => {
+                document.querySelector('.error-discount').classList.add('hidden')
+            },3000) {% endcomment %}
+        }
+    })
+
+    document.querySelector('.employee-discount-remove').addEventListener('click', (e) => {
+        e.preventDefault()
+        removeDiscountCode()
+    })
+
+    function removeDiscountCode(){
+        document.querySelector('.app-ajax-loader').classList.remove('hidden')
+        document.querySelectorAll('.order-summary__section--discount .tags-list .tag').forEach(item => {
+            item.querySelector('.tag__button').click()
+        })
+        setTimeout(() => {
+            var checkExist = setInterval(function() {
+                if (document.querySelector('.order-summary__section--discount')) {
+                    clearInterval(checkExist)
+                    document.querySelector('.success-discount').innerText = 'Discount is successfully removed'
+                    document.querySelector('.success-discount').classList.remove('hidden')
+                    document.querySelector('.employee-discount-add').classList.remove('hidden')
+                    document.querySelector('.employee-discount-remove').classList.add('hidden')
+                    document.querySelector('.app-ajax-loader').classList.add('hidden')
+                    sessionStorage.removeItem('discountCode')
+                    sessionStorage.removeItem('subTotalPrice')
+                }
+            }, 10)
+        },2000)
+    }
+
+    async function createDiscountCode(customerId, discountAmount) {
+        var formData = {
+            "customerId": customerId,
+            "discountAmount": discountAmount
+        }
+        return new Promise( (resolve, reject) => {
+            fetch(`${hostUrl}/api/createEmployeeDiscount?shop=${shopUrl}`, {
+            method : "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+            })
+            .then(res => res.json())
+            .then(data => {
+                resolve(data) 
+            }).catch( err => {
+                reject(err)
+            })
+        })
+    }
+
+    async function setAdditionalCartAttributes(discountApplied, customerId, discountPercentage, discountAmount, subTotalPrice) {
+        var formData = {
+            attributes: {
+                "discountApplied": discountApplied,
+                "customerId": customerId,
+                "discountPercentage": discountPercentage,
+                "discountAmount": discountAmount,
+                "subTotalPrice": subTotalPrice
+            }
+        }
+        return new Promise( (resolve, reject) => {
+            fetch(`/cart/update.js`, {
+            method : "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+            })
+            .then(res => res.json())
+            .then(data => {
+                resolve(data) 
+            }).catch( err => {
+                reject(err)
+            })
+        })
+    }
+
+    if(Shopify.Checkout.step == 'thank_you'){
+        sessionStorage.removeItem('discountCode')
+        sessionStorage.removeItem('subTotalPrice') 
+        document.querySelector('.employee-discount-feature').classList.add('hidden')
+    }
+
+</script>

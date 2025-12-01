@@ -1,0 +1,32 @@
+api_version = "2025-04"
+
+[[extensions]]
+name = "t:name"
+handle = "payment-customization12345"
+
+uid = "f28cf259-eac9-660d-9788-f90601b1707525fd4461"
+
+type = "function"
+
+description = "t:description"
+
+  [[extensions.targeting]]
+  target = "purchase.payment-customization.run"
+  input_query = "src/run.graphql"
+  export = "run"
+
+  [extensions.build]
+  command = ""
+  path = "dist/function.wasm"
+
+  [extensions.ui.paths]
+  create = "/"
+  details = "/"
+
+[scopes]
+scopes = [
+    "read_products",
+    "write_products",
+    "read_payment_customizations",
+    "write_payment_customizations",
+]

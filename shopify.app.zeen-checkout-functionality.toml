@@ -1,0 +1,29 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "f1df3e31857f28047ee64d38e28954e6"
+name = "Zeen Checkout Functionality"
+handle = "zeen-checkout-functionality"
+application_url = "https://into-flip-queens-london.trycloudflare.com"
+embedded = true
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = "store-for-customer-account-test.myshopify.com"
+include_config_on_deploy = true
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_metaobjects,read_payment_customizations,read_translations,write_metaobjects,write_payment_customizations,write_products"
+
+[auth]
+redirect_urls = [
+  "https://into-flip-queens-london.trycloudflare.com/auth/callback",
+  "https://into-flip-queens-london.trycloudflare.com/auth/shopify/callback",
+  "https://into-flip-queens-london.trycloudflare.com/api/auth/callback"
+]
+
+[webhooks]
+api_version = "2025-07"
+
+[pos]
+embedded = false

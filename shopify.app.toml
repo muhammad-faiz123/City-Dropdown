@@ -1,0 +1,28 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "f5d6effcb3f36c6588ed198837905b8e"
+name = "hdZeen"
+handle = "hdzeen"
+application_url = "https://medieval-seller-sonic-around.trycloudflare.com"
+embedded = true
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = "habitt-international-mean3.myshopify.com"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_payment_customizations,write_payment_customizations,write_products"
+
+[auth]
+redirect_urls = [
+  "https://medieval-seller-sonic-around.trycloudflare.com/auth/callback",
+  "https://medieval-seller-sonic-around.trycloudflare.com/auth/shopify/callback",
+  "https://medieval-seller-sonic-around.trycloudflare.com/api/auth/callback"
+]
+
+[webhooks]
+api_version = "2025-07"
+
+[pos]
+embedded = false

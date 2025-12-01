@@ -1,0 +1,27 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "76eaa3714848214739f2f4d1347fa406"
+name = "SS Checkout"
+application_url = "https://skill-lives-opportunity-executives.trycloudflare.com"
+embedded = true
+handle = "ss-66"
+
+[webhooks]
+api_version = "2025-07"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_metaobject_definitions,read_metaobjects,read_payment_customizations,read_translations,write_metaobject_definitions,write_metaobjects,write_payment_customizations,write_products"
+
+[auth]
+redirect_urls = [
+  "https://skill-lives-opportunity-executives.trycloudflare.com/auth/callback",
+  "https://skill-lives-opportunity-executives.trycloudflare.com/auth/shopify/callback",
+  "https://skill-lives-opportunity-executives.trycloudflare.com/api/auth/callback"
+]
+
+[pos]
+embedded = false
+
+[build]
+automatically_update_urls_on_dev = true
